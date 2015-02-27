@@ -17,25 +17,29 @@ function app(){
         {url: "./bower_components/lodash/lodash.min.js"},
 
         // when using just Backbone, use this line
-        {url: "./bower_components/backbone/backbone.js"},
+        // {url: "./bower_components/backbone/backbone.js"},
         // when using Parse, comment out the above line and uncomment the line below
-        // {url: "./bower_components/parse-js-sdk/lib/parse.min.js"},
+        {url: "./bower_components/parse-js-sdk/lib/parse.min.js"},
 
         // when using React (and the plugin JSnoX), uncomment the following two lines
-        // {url: "./bower_components/react/react.min.js"},
-        // {url: "./bower_components/jsnox/index.js"},
+        {url: "./bower_components/react/react.min.js"},
+        {url: "./bower_components/jsnox/index.js"},
 
         // other stuff
         {url: "./bower_components/pace/pace.min.js"},
         {url: "./js/TemplateView.js"}
     ).then(function(){
         // if turning on JSnoX, uncommment the following line
-        // window.d = jsnox(React);
+        window.d = jsnox(React);
         // if turning on React, uncomment the following line
-        // React.initializeTouchEvents(true);
+        React.initializeTouchEvents(true);
 
         document.querySelector("html").style.opacity = 1;
         // start app?
+
+         Parse.initialize("rVBofzAaRbD6E9EaoExVxLlNQVvyei5685EWsBfZ", "6d2tY7wuIJcYPoljQREE5XDUiKQGcXmjioO9LfSC");
+
+        new Parse.TodoRouter();
     })
 
 }
