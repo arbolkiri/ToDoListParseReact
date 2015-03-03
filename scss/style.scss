@@ -73,8 +73,72 @@
  * GENERAL
  */
 
-// img {max-width:100%;}
+img {max-width:100%;}
 
 body {
     transition: opacity .25s ease;
+    background-color: #aa4639;
+}
+.container {
+    background-color: #ffcbaa;
+    margin-left: auto;
+    margin-right: auto;
+    width: 600px;
+    height: 600px;
+    padding: 5%;
+    color: #4c678c;
+}
+.header {
+    margin-bottom: 2rem;
+    position: relative;
+    height: 50px;
+    background-color: #ffdffa;
+    display: block;
+    font-family: Arnoldboecklin, fantasy;
+    font-size: 25px;
+    padding-left: 30px;
+    line-height: 2.5em;
+    color: #4c678c;
+}
+.header1 {
+    padding-top: 10px;
+    margin-bottom: 2rem;
+    position: relative;
+    height: 50px;
+    background-color: #ffdffa;
+    display: block;
+    color: #4c678c;
+    text-align: center;
+    font-family: Arnoldboecklin, fantasy;
+
+}
+h5{
+color: #4c678c;
+font-family: Arnoldboecklin, fantasy;
+}
+h6{
+   color: #4c678c;
+   padding-top:25px;
+   margin-bottom: -1em;
+   font-family: Arnoldboecklin, fantasy;
+}
+h4{
+   color: #4c678c;
+   padding-top:25px;
+   margin-bottom: -1em;
+   font-family: Arnoldboecklin, fantasy;
+}
+button{
+    background-color: #758aa8;
+    color: #ffcbaa;
+   width: 80px;
+
+}
+button:submit{
+    background-color: #758aa8;
+    color: #ffcbaa;
+   width: 80px;
+}
+.register {
+    padding-top:40px;
 }

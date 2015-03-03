@@ -1,5 +1,3 @@
-//I SHOULD DO TESTS FIRST
-//CAN I DELETE TEMPLATES? I think yes because html in react
 ;(function(exports) {
     "use strict";
 
@@ -7,31 +5,19 @@
 
         initialize: function() {//create own initialize function to overwrite default
             console.log("initialized");
-            this.collection = new Parse.TodoActualList();
-            this.isLoggedIn();
+            this.collection = new Parse.TodoActualList()
+            this.isLoggedIn()
             this.container = document.querySelector('.container');
-            this.homeView = d(Parse.homeView, {collection: this.collection});
-            Parse.history.start();
+            this.homeView = d(Parse.HomeView, {collection: this.collection});
+            this.authView = d(Parse.AuthView);
+            Parse.history.start()
+
         },
         routes: {
+
             "login": "login",
-            "*default": "home",
-
+            "*default": "home"
         },
-
-        isLoggedIn: function() {
-            this.user = Parse.User.current();
-            if (!this.user) {
-                this.navigate("login", {trigger: true}); //this is a simple check
-                return false;
-            }
-            return true;
-        },
-
-        login: function(){
-            React.render(d(Parse.AuthView, {}), this.container);//d is from Parse; Parse.Authview is component?; this.container is from Router
-        },
-
         home: function() {
             if (!this.isLoggedIn()) return; //return is just exiting the function if they are not logged in
 
@@ -42,68 +28,48 @@
             this.collection.fetch(); // fetch gets the data
             React.render(this.homeView, this.container);//automatically renders onto DOM; this.homeView/container is from Router;
         },
+        isLoggedIn: function() {
+            this.user = Parse.User.current();
+            if (!this.user) {
+                this.navigate("login", {trigger: true}); //this is a simple check
+                return false;
+            }
+            return true;
+        },
+        login: function(){
+            React.render(d(Parse.AuthView, {}), this.container);//d is from Parse; Parse.Authview is component?; this.container is from Router
+        }
     })
 
-//** NEED THIS VIEW? CHANGE IT TO REACT? IS THIS REPLACED WITH HOMEVIEW?
-    // Parse.TodoView = Parse.TemplateView.extend({
-    //     el: ".container",
-    //     view: "PAppQ", //--points to parseToDoapp.html
-    //     events: {
-    //         "submit .tasks": "addTask",
-    //         "change input[name= 'urgent']": "toggleUrgent", //if input is urgent, then toggleUrgent function
-    //         "change input[name= 'isDone']": "toggleIsDone",
-    //         "keyup .description": "setDescription"
-    //     },
-    //     addTask: function(event) {
-    //         event.preventDefault();
-    //         debugger;
-    //         var data = {
-    //             description: this.el.querySelector("input[name= 'John']").value,
-    //             user: Parse.User.current()
-    //         }
-    //         this.collection.create(data, { //does an .add AND creates a new model and saves it
-    //             validate: true
-    //         })
-    //         console.log("Yay!");
-    //         // debugger;
-    //     },
-    //     getModelAssociatedWithEvent: function(event) { //should always return a model
-    //         var el = event.target,
-    //             li = $(el).closest('li').get(0),
-    //             id = li.getAttribute('id'),
-    //             m = this.collection.get(id);
+    Parse.TaskModel = Parse.Object.extend({
+        className: "TaskModel",
+        defaults: {
+            isDone: false,
+            urgent: false,
+            dueDate: null,
+            tags: [],
+            description: "no description given"
+        },
+         //listening for change on it's own attributes/events
+         //save is backbone; sends the info back online to parse.com, to specific id is given to object, automatically saves
+        initialize: function() {
+            this.on("change", function(){
+                this.save();
+            })
+        }
+    })
 
-    //         return m;
+    Parse.TodoActualList = Parse.Collection.extend({
+        model: Parse.TaskModel,
+        comparator: function(a, b){
+            // if a is 'urgent', -1 (a comes before b)
+            if(a.get('urgent') && !b.get('urgent') || !a.get('isDone') && b.get('isDone')) return -1;
+            // if a 'isDone', 1 (a comes after b)
+            if(a.get('isDone') && !b.get('isDone') || !a.get('urgent') && b.get('urgent')) return 1;
 
-    //     },
-    //     toggleUrgent: function(event) {
-    //         var m = this.getModelAssociatedWithEvent(event);
-    //         if (m) {
-    //             m.set('urgent', !m.get('urgent'));
-
-    //             this.colletion.sort();
-    //             this.render();
-    //         }
-    //     },
-    //     toggleIsDone: function(event) {
-    //         var m = this.getModelAssociatedWithEvent(event);
-    //         if (m) {
-    //             m.set('isDone', !m.get('isDone'));
-    //             if (m.get('isDone')) {
-    //                 m.set('urgent', false);
-    //             }
-    //             this.collection.sort();
-    //             this.render();
-    //         }
-    //     },
-    //     setDescription: function(event) {
-    //         var m = this.getModelAssociatedWithEvent(event);
-    //         if (m) {
-    //             m.set('description', event.target.innerText);
-    //             m.save();
-    //         }
-    //     }
-    // })
+            return a.get('description') > b.get('description') ? 1 : -1;
+        }
+    })
 
     Parse.AuthView = React.createClass({//creating a React component, a.k.a element
         getInitialState: function(){//React works with 'states'; this sets the state before any interaction occurs
@@ -114,11 +80,11 @@
             return{};
         },
 
-        componentWillMount : function() {},//invoked once, both client server before rendering
+        componentWillMount: function() {},//invoked once, both client server before rendering
         componentWillReceiveProps: function() {},//invoked when attributes updated
-        componentWillUnmount : function() {},// invoked before unmounting component
+        componentWillUnmount: function() {},
 
-            _login: function(e){//use _ to create custom method in React
+        _login: function(e){//use _ to create custom method in React
             e.preventDefault();
             var data =  {
                 username: this.refs.email.getDOMNode().value,//ref is property refers to corresponding backing instance of anything from render()
@@ -126,7 +92,7 @@
             }
             var result = Parse.User.logIn(data.username, data.password);
             result.then(function(){
-                window.location.hash = "#home"
+                window.location.hash = "#home";
             })
             result.fail(function(error){
                 alert(error.message);
@@ -140,21 +106,20 @@
                 password1: this.refs.pass1.getDOMNode().value,
                 password2: this.refs.pass2.getDOMNode().value
          }
-
          if(data.password1 !== data.password2){
                 alert("Passwords must match");
                 return;
          }
 
             var user = new Parse.User();
-            user.set('username', data.username)
-            user.set('email', data.username)
-            user.set('password', data.password1)
+            user.set('username', data.username);
+            user.set('email', data.username);
+            user.set('password', data.password1);
 
-            var result = user.signUp()
+            var result = user.signUp();
             result.then(function(user){
-                window.location.hash = "#home"
-                alert("Welcome home, "+user.get("username"));
+                window.location.hash = "#home";
+                alert("Welcome home");
             })
             result.fail(function(error){
                 alert(error.message);
@@ -163,28 +128,30 @@
 
         render: function() {
             return d('div', [
-                d('h5', 'Login:'),
-                d('form.login', { onSubmit: this._login }, [
+                d('div.header1', '¡Nos hiciste falta!'),
+                d('h5','Iniciar sesión:'),
+                d('form.login', { onSubmit: this._login}, [
                     d('div', [
-                        d('input:email@email[placeholder="email"][required]')
+                        d('input:email@email[placeholder="Correo electrónico"][required]')
                     ]),
                     d('div.pass', [
-                        d('input:password@pass[placeholder="password"][required]')
+                        d('input:password@pass[placeholder="Contraseña"][required]')
                     ]),
                     d('button:submit', '√')
                 ]),
 
-                d('h5', "If you don't have an account, register here:"),
+                d('h6', "¿Es la primer vez que utilizas Tú Lo Haces?"),
+                d('h4', "Para crear una cuenta:"),
 
                 d('form.register', { onSubmit: this._register }, [
                     d('div', [
-                        d('input:email@email[name="email"][placeholder="email"][required]')
+                        d('input:email@email[name="email"][placeholder="Correo electrónico"][required]')
                     ]),
                     d('div.2', [
-                        d('input:password@pass1[name="password1"][placeholder="password"][required]')
+                        d('input:password@pass1[name="password1"][placeholder="Contraseña"][required]')
                     ]),
                     d('div.3', [
-                        d('input:password@pass2[name="password2"][placeholder="repeat password"][required]')
+                        d('input:password@pass2[name="password2"][placeholder="Confirme su contraseña"][required]')
                     ]),
                     d('button:submit', '√')
                 ])
@@ -252,7 +219,9 @@
         // called by React whenever the state changes
         render: function() {
             var self = this;
-            return d('div', [
+            return
+                d('div', [
+                d('h5', 'To Do, Doing, Done'),
                 d('form.tasks', { onSubmit: this._addTask }, [
                     d('div', [
                         d('input:text[required]@description')
@@ -286,25 +255,6 @@
             ]);
         }
     })
-    Parse.TaskModel = Parse.Object.extend({
-        className: "description",
-        defaults: {
-            isDone: false,
-            urgent: false,
-            dueDate: null,
-            tags: [],
-            description: "no description given"
-        },
-        initialize: function() {
-            this.on("change", function(){ //listening for change on it's own attributes/events
-                this.save(); //save is backbone; sends the info back online to parse.com, to specific id is given to object, automatically saves
-            })
-        }
-    });
-    Parse.TodoActualList = Parse.Collection.extend({
-        model: Parse.TaskModel
-    })
-
 
 })(typeof module === "object" ? module.exports : window)
 
